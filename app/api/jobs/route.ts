@@ -8,7 +8,12 @@ export async function GET(req: NextRequest) {
   const datePosted = searchParams.get("datePosted") || "all";
 
   const apiKey = process.env.RAPIDAPI_KEY;
-  
+  if (!apiKey || apiKey === "your_rapidapi_key_here") {
+    return NextResponse.json({
+      error: "missing_key",
+      message: "RAPIDAPI_KEY is not set. Add it to .env.local and restart.",
+    }, { status: 500 });
+  }
 
   const url = new URL("https://jsearch.p.rapidapi.com/search");
   url.searchParams.set("query", `${query} ${location}`);
