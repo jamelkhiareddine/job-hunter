@@ -7,7 +7,8 @@ export async function GET(req: NextRequest) {
   const page = searchParams.get("page") || "1";
   const datePosted = searchParams.get("datePosted") || "all";
 
-
+  const apiKey = process.env.RAPIDAPI_KEY;
+  
 
   const url = new URL("https://jsearch.p.rapidapi.com/search");
   url.searchParams.set("query", `${query} ${location}`);
