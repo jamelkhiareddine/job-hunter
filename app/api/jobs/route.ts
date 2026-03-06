@@ -2,32 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const query      = searchParams.get("query")      || "Node.js Developer";
-  const location   = searchParams.get("location")   || "Germany";
-  const page       = searchParams.get("page")        || "1";
-  const datePosted = searchParams.get("datePosted")  || "all";
+  const query = searchParams.get("query") || "Node.js Developer";
+  const location = searchParams.get("location") || "Germany";
+  const page = searchParams.get("page") || "1";
+  const datePosted = searchParams.get("datePosted") || "all";
 
-  const apiKey = process.env.RAPIDAPI_KEY;
-  if (!apiKey || apiKey === "e9a3b711afmsh95f1504003fb938p138fa6jsn591f16f896fe") {
-    return NextResponse.json({
-      error: "missing_key",
-      message: "RAPIDAPI_KEY is not set. Add it to .env.local and restart.",
-    }, { status: 500 });
-  }
+
 
   const url = new URL("https://jsearch.p.rapidapi.com/search");
-  url.searchParams.set("query",           `${query} ${location}`);
-  url.searchParams.set("page",            page);
-  url.searchParams.set("num_pages",       "1");
-  url.searchParams.set("date_posted",     datePosted);
-  url.searchParams.set("country",         "DE");
+  url.searchParams.set("query", `${query} ${location}`);
+  url.searchParams.set("page", page);
+  url.searchParams.set("num_pages", "1");
+  url.searchParams.set("date_posted", datePosted);
+  url.searchParams.set("country", "DE");
 
   let raw: Record<string, unknown>;
   try {
     const response = await fetch(url.toString(), {
       headers: {
         "x-rapidapi-host": "jsearch.p.rapidapi.com",
-        "x-rapidapi-key":  apiKey,
+        "x-rapidapi-key": apiKey,
       },
       cache: "no-store",
     });
@@ -76,17 +70,17 @@ export async function GET(req: NextRequest) {
   }
 
   const jobs = data.map((j) => ({
-    id:          j.job_id,
-    title:       j.job_title,
-    company:     j.employer_name,
-    location:    [j.job_city, j.job_state, j.job_country].filter(Boolean).join(", "),
-    remote:      j.job_is_remote,
-    url:         j.job_apply_link,
+    id: j.job_id,
+    title: j.job_title,
+    company: j.employer_name,
+    location: [j.job_city, j.job_state, j.job_country].filter(Boolean).join(", "),
+    remote: j.job_is_remote,
+    url: j.job_apply_link,
     description: (j.job_description as string)?.slice(0, 2000),
-    posted:      j.job_posted_at_datetime_utc,
-    source:      j.job_publisher,
-    logo:        j.employer_logo,
-    salary:      j.job_min_salary
+    posted: j.job_posted_at_datetime_utc,
+    source: j.job_publisher,
+    logo: j.employer_logo,
+    salary: j.job_min_salary
       ? `${j.job_min_salary}–${j.job_max_salary} ${j.job_salary_currency || "EUR"}`
       : null,
   }));
