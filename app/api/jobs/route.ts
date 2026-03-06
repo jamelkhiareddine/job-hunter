@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const datePosted = searchParams.get("datePosted")  || "all";
 
   const apiKey = process.env.RAPIDAPI_KEY;
-  if (!apiKey || apiKey === "your_rapidapi_key_here") {
+  if (!apiKey || apiKey === "e9a3b711afmsh95f1504003fb938p138fa6jsn591f16f896fe") {
     return NextResponse.json({
       error: "missing_key",
       message: "RAPIDAPI_KEY is not set. Add it to .env.local and restart.",
