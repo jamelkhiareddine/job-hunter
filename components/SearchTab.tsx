@@ -157,23 +157,6 @@ export default function SearchTab({ onAddJob }: { onAddJob: (job: Partial<Record
         </div>
       </div>
 
-      {/* API key notice */}
-      {!searched && (
-        <div style={{ background: "linear-gradient(135deg,#eff6ff,#dbeafe)", borderRadius: 12, padding: "16px 20px", border: "1px solid #bfdbfe", marginBottom: 16 }}>
-          <h3 style={{ margin: "0 0 8px", fontSize: 14, color: "#1e40af", fontWeight: 700 }}>🔑 One-time setup required</h3>
-          <p style={{ margin: "0 0 10px", fontSize: 12, color: "#1e40af", lineHeight: 1.6 }}>
-            JSearch aggregates jobs from <strong>LinkedIn, Indeed, Glassdoor</strong> and more. It needs a free RapidAPI key (no credit card):
-          </p>
-          <ol style={{ margin: "0 0 10px", paddingLeft: 18, fontSize: 12, color: "#1e40af", lineHeight: 2 }}>
-            <li>Go to <a href="https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch" target="_blank" rel="noreferrer" style={{ color: "#2563eb", fontWeight: 700 }}>rapidapi.com → JSearch</a></li>
-            <li>Click <strong>"Subscribe to Test"</strong> → choose the <strong>Free plan</strong> (200 calls/month)</li>
-            <li>Copy your API key from the dashboard</li>
-            <li>Add it to <code style={{ background: "#dbeafe", padding: "1px 5px", borderRadius: 4 }}>.env.local</code>: <code style={{ background: "#dbeafe", padding: "1px 5px", borderRadius: 4 }}>RAPIDAPI_KEY=your_key_here</code></li>
-            <li>Restart the dev server: <code style={{ background: "#dbeafe", padding: "1px 5px", borderRadius: 4 }}>npm run dev</code></li>
-          </ol>
-          <p style={{ margin: 0, fontSize: 11, color: "#3b82f6" }}>✓ Free tier: 200 searches/month — more than enough for a job hunt.</p>
-        </div>
-      )}
 
       {/* Error */}
       {error && (
