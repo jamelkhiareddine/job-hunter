@@ -1,72 +1,77 @@
 "use client";
-import { useState, useEffect } from "react";
+// app/page.tsx
+import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import SearchTab from "@/components/SearchTab";
 import TrackerTab from "@/components/TrackerTab";
 import AddJobTab from "@/components/AddJobTab";
 import CoverLetterModal from "@/components/CoverLetterModal";
 import RecommendationsTab from "@/components/RecommendationsTab";
+import { createClient } from "../lib/supabase/client";
+import { logout } from "./actions/auth";
+import { getJobs, addJob as addJobAction, updateJobStatus, deleteJob as deleteJobAction } from "./actions/jobs";
 import { Job } from "@/lib/data";
 
 type Tab = "search" | "tracker" | "add" | "recommendations";
-const STORAGE_KEY = "mj_jobs_v2";
 
 export default function Home() {
   const [tab, setTab]           = useState<Tab>("search");
   const [jobs, setJobs]         = useState<Job[]>([]);
   const [modalJob, setModalJob] = useState<Job | null>(null);
   const [toast, setToast]       = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
+  // Load user email
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setJobs(JSON.parse(saved));
-    } catch {}
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? "");
+    });
   }, []);
 
-  const persist = (updated: Job[]) => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch {}
-  };
+  // Load jobs from DB
+  const loadJobs = useCallback(async () => {
+    const data = await getJobs();
+    setJobs(data);
+  }, []);
+
+  useEffect(() => { loadJobs(); }, [loadJobs]);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(""), 2500);
   };
 
-  const addJob = (jobData: Omit<Job, "id" | "date">) => {
-    // Prevent duplicate
+  const addJob = async (jobData: Omit<Job, "id">) => {
     if (jobs.some(j => j.title === jobData.title && j.company === jobData.company)) {
       showToast("⚠️ Already in tracker");
       return;
     }
-    const updated = [
-      ...jobs,
-      { ...jobData, id: Date.now(), date: new Date().toLocaleDateString("de-DE") },
-    ];
-    setJobs(updated);
-    persist(updated);
+    const result = await addJobAction(jobData);
+    if (result?.error) { showToast("❌ " + result.error); return; }
     showToast("✓ Saved to tracker!");
+    loadJobs();
   };
 
-  const addJobAndSwitch = (jobData: Omit<Job, "id" | "date">) => {
-    addJob(jobData);
+  const addJobAndSwitch = async (jobData: Omit<Job, "id">) => {
+    await addJob(jobData);
     setTab("tracker");
   };
 
-  const updateStatus = (id: number, status: string) => {
-    const updated = jobs.map(j => j.id === id ? { ...j, status } : j);
-    setJobs(updated); persist(updated);
+  const handleUpdateStatus = async (id: number, status: string) => {
+    await updateJobStatus(id, status);
+    loadJobs();
   };
 
-  const deleteJob = (id: number) => {
-    const updated = jobs.filter(j => j.id !== id);
-    setJobs(updated); persist(updated);
+  const handleDeleteJob = async (id: number) => {
+    await deleteJobAction(id);
     if (modalJob?.id === id) setModalJob(null);
+    loadJobs();
   };
 
   return (
     <>
-      <Header tab={tab} setTab={setTab} jobCount={jobs.length} />
+      <Header tab={tab} setTab={setTab} jobCount={jobs.length} userEmail={userEmail} onLogout={logout} />
 
       <main style={{ maxWidth: 980, margin: "0 auto", padding: "22px 18px" }}>
         {tab === "search" && (
@@ -79,14 +84,15 @@ export default function Home() {
               source:      partial.source || "JSearch",
               status:      "Saved",
               notes:       "",
+              date:        new Date().toLocaleDateString("de-DE"),
             })}
           />
         )}
         {tab === "tracker" && (
           <TrackerTab
             jobs={jobs}
-            onUpdateStatus={updateStatus}
-            onDelete={deleteJob}
+            onUpdateStatus={handleUpdateStatus}
+            onDelete={handleDeleteJob}
             onCoverLetter={setModalJob}
             onGoSearch={() => setTab("search")}
           />
@@ -107,6 +113,7 @@ export default function Home() {
               source:      partial.source ?? "JSearch",
               status:      "Saved",
               notes:       "",
+              date:        new Date().toLocaleDateString("de-DE"),
             })}
           />
         )}
@@ -114,7 +121,6 @@ export default function Home() {
 
       <CoverLetterModal job={modalJob} onClose={() => setModalJob(null)} />
 
-      {/* Toast notification */}
       {toast && (
         <div style={{
           position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",

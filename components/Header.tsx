@@ -1,4 +1,5 @@
 "use client";
+// components/Header.tsx
 import { PROFILE } from "@/lib/data";
 
 type Tab = "search" | "tracker" | "add" | "recommendations";
@@ -7,13 +8,15 @@ interface HeaderProps {
   tab: Tab;
   setTab: (t: Tab) => void;
   jobCount: number;
+  userEmail?: string;
+  onLogout?: () => void;
 }
 
-export default function Header({ tab, setTab, jobCount }: HeaderProps) {
+export default function Header({ tab, setTab, jobCount, userEmail, onLogout }: HeaderProps) {
   const tabs: [Tab, string][] = [
-    ["search",  "🔍 Search"],
-    ["tracker", `📋 Tracker (${jobCount})`],
-    ["add",     "➕ Add Job"],
+    ["search",          "🔍 Search"],
+    ["tracker",         `📋 Tracker (${jobCount})`],
+    ["add",             "➕ Add Job"],
     ["recommendations", "🎯 Job Fit"],
   ];
 
@@ -40,27 +43,54 @@ export default function Header({ tab, setTab, jobCount }: HeaderProps) {
           </p>
         </div>
 
-        <nav style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {tabs.map(([t, label]) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              style={{
-                padding: "8px 15px",
-                borderRadius: 8,
-                border: "none",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 700,
-                transition: "all 0.15s",
-                background: tab === t ? "#2563eb" : "rgba(255,255,255,0.1)",
-                color: tab === t ? "white" : "#94b8e0",
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+          <nav style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {tabs.map(([t, label]) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                style={{
+                  padding: "8px 15px",
+                  borderRadius: 8,
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  transition: "all 0.15s",
+                  background: tab === t ? "#2563eb" : "rgba(255,255,255,0.1)",
+                  color: tab === t ? "white" : "#94b8e0",
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          {/* User info + logout */}
+          {userEmail && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 10, color: "#60a0d4", fontFamily: "'DM Mono'" }}>
+                {userEmail}
+              </span>
+              <button
+                onClick={onLogout}
+                style={{
+                  padding: "4px 10px",
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  borderRadius: 6,
+                  color: "#94b8e0",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans'",
+                }}
+              >
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
