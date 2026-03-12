@@ -42,7 +42,7 @@ export default function Home() {
     setTimeout(() => setToast(""), 2500);
   };
 
-  const addJob = async (jobData: Omit<Job, "id">) => {
+  const addJob = async (jobData: Omit<Job, "id"| "date">) => {
     if (jobs.some(j => j.title === jobData.title && j.company === jobData.company)) {
       showToast("⚠️ Already in tracker");
       return;
@@ -53,7 +53,7 @@ export default function Home() {
     loadJobs();
   };
 
-  const addJobAndSwitch = async (jobData: Omit<Job, "id">) => {
+  const addJobAndSwitch = async (jobData: Omit<Job, "id"| "date">) => {
     await addJob(jobData);
     setTab("tracker");
   };
@@ -83,9 +83,8 @@ export default function Home() {
               description: partial.description || "",
               source:      partial.source || "JSearch",
               status:      "Saved",
-              notes:       "",
-              date:        new Date().toLocaleDateString("de-DE"),
-            })}
+              notes:       ""
+                        })}
           />
         )}
         {tab === "tracker" && (
@@ -112,8 +111,7 @@ export default function Home() {
               description: partial.description,
               source:      partial.source ?? "JSearch",
               status:      "Saved",
-              notes:       "",
-              date:        new Date().toLocaleDateString("de-DE"),
+              notes:       ""
             })}
           />
         )}

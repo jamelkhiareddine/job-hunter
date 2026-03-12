@@ -17,7 +17,7 @@ export async function getJobs(): Promise<Job[]> {
 }
 
 /** Add a new job */
-export async function addJob(job: Omit<Job, "id">) {
+export async function addJob(job: Omit<Job, "id"| "date">) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
